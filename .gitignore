@@ -12,3 +12,4 @@ out/
 _online_stash/
 local.properties
 client/logs/
+logs/
