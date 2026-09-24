@@ -27,5 +27,7 @@ jobs:
           git clone --depth 1 https://github.com/transmute-games/transmute-core.git /tmp/transmute-core
           cd /tmp/transmute-core
           ./gradlew :transmute-core:publishToMavenLocal --no-daemon
+      - name: Dead code checks
+        run: ./gradlew deadCodeCheck --no-daemon
       - name: Test
         run: ./gradlew test :client:verifyHeadless --no-daemon

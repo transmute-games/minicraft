@@ -86,8 +86,8 @@ public final class GameServer implements AutoCloseable
             case MOVE -> onMove(conn, payload);
             case TILE, INTERACT -> onDig(conn, payload);
             case PICKUP -> onPickup(conn, payload);
-            case CHESTIN -> onChestIn(conn, payload);
-            case CHESTOUT -> onChestOut(conn, payload);
+            case CHESTIN -> onChestIn(conn);
+            case CHESTOUT -> onChestOut(conn);
             case DISCONNECT -> onDisconnect(conn);
             case PING -> conn.send(MinicraftProtocol.InputType.PING, "pong");
             default -> {
@@ -178,7 +178,7 @@ public final class GameServer implements AutoCloseable
         conn.send(MinicraftProtocol.InputType.ADDITEMS, "Wood;" + p.wood);
     }
 
-    private void onChestIn(PacketConnection conn, String payload)
+    private void onChestIn(PacketConnection conn)
     {
         Integer id = idOf(conn);
         if (id == null)
@@ -194,7 +194,7 @@ public final class GameServer implements AutoCloseable
         }
     }
 
-    private void onChestOut(PacketConnection conn, String payload)
+    private void onChestOut(PacketConnection conn)
     {
         Integer id = idOf(conn);
         if (id == null)

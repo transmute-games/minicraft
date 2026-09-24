@@ -32,7 +32,7 @@ Headless smoke:
 
 ```bash
 ./gradlew :client:verifyHeadless
-./gradlew test
+./gradlew deadCodeCheck test
 ```
 
 ## Architecture

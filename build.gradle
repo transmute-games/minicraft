@@ -15,6 +15,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'pmd'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -31,4 +32,49 @@ subprojects {
         implementation 'org.tinylog:tinylog-impl:2.4.1'
         testImplementation 'junit:junit:4.13.2'
     }
+
+    pmd {
+        consoleOutput = true
+        toolVersion = '7.7.0'
+        ruleSetFiles = files("${rootDir}/config/pmd/unused.xml")
+        ruleSets = []
+        ignoreFailures = false
+    }
+
+    // Upstream Minicraft+ domain has intentional unused / legacy patterns; scan only
+    // Transmute-authored packages and the new LAN network stack.
+    tasks.named('pmdMain').configure {
+        exclude 'minicraft/core/**'
+        exclude 'minicraft/entity/**'
+        exclude 'minicraft/gfx/**'
+        exclude 'minicraft/item/**'
+        exclude 'minicraft/level/**'
+        exclude 'minicraft/saveload/**'
+        exclude 'minicraft/screen/**'
+        exclude 'minicraft/util/**'
+        // Keep Analytics/Network helpers out; they are thin wrappers around upstream APIs.
+        exclude 'minicraft/network/Analytics.java'
+        exclude 'minicraft/network/Network.java'
+    }
+
+    tasks.named('pmdTest').configure {
+        enabled = false
+    }
+}
+
+tasks.register('checkEmptyTypes', Exec) {
+    group = 'verification'
+    description = 'Fails on empty class/interface/enum stubs'
+    workingDir = rootDir
+    commandLine 'bash', 'scripts/check-empty-types.sh'
+}
+
+tasks.register('deadCodeCheck') {
+    group = 'verification'
+    description = 'PMD unused-code rules + empty stub scan'
+    dependsOn subprojects.collect { it.tasks.named('pmdMain') }, 'checkEmptyTypes'
+}
+
+tasks.named('check').configure {
+    dependsOn 'deadCodeCheck'
 }

@@ -3,7 +3,7 @@
 ## Golden path
 
 1. Ensure `games.transmute:transmute-core:1.0.0` is in mavenLocal (or JitPack).
-2. `./gradlew :client:test :client:verifyHeadless :common:test`
+2. `./gradlew deadCodeCheck :client:test :client:verifyHeadless :common:test`
 3. Run: `./gradlew :client:run`
 4. Dedicated server: `./gradlew :server:run --args='--port 4225'`
 
@@ -18,10 +18,13 @@
 ## Verify
 
 ```bash
+./gradlew deadCodeCheck
 ./gradlew :client:verifyHeadless
 ./gradlew :client:test --tests games.transmute.minicraft.SinglePlayerPlaytest
 ./gradlew :common:test --tests minicraft.network.MultiplayerIntegrationTest
 ```
+
+`deadCodeCheck` runs PMD unused-code rules on Transmute-authored packages (`games.transmute.**`, LAN `GameServer`/`GameClient`) and fails on empty type stubs (`scripts/check-empty-types.sh`).
 
 ## Baseline
 
