@@ -1,0 +1,6 @@
+# Move right, then attack once (absolute frames from play() start).
+0       hold     D
+30      release  D
+32      press    SPACE
+33      release  SPACE
+34      idle

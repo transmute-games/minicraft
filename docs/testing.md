@@ -14,7 +14,9 @@ Boots `MinicraftGame` under `GameHarness`, steps frames, asserts the title scree
 ./gradlew :client:test --tests games.transmute.minicraft.SinglePlayerPlaytest
 ```
 
-Covers world gen → move → attack → dig → craft → save/load via `SinglePlayerSession` helpers.
+Covers world gen → move → attack → dig → craft → save/load via `SinglePlayerSession`
+helpers. Move/attack input is driven by `PlaytestScript`
+(`playtests/move-attack.script`).
 
 ## Domain smoke
 

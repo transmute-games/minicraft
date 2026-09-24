@@ -22,6 +22,9 @@ flox activate -- ./gradlew :client:run
 
 ## Publish the engine (once)
 
+transmute-core is a multi-language monorepo; Minicraft only needs the **Java** artifact
+(`:transmute-core` under `packages/java/`). From a sibling checkout:
+
 ```bash
 cd ../transmute-core
 ./gradlew :transmute-core:publishToMavenLocal

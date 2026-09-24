@@ -32,7 +32,7 @@ flowchart TB
 |-----|------|
 | `docs` | `markdownlint-cli2` + `scripts/check-mermaid.sh` (syntax always; `mmdc` render when Chromium is on `PATH`) |
 | `quality` | Spotless + dead-code checks inside Flox |
-| `test` | Publish transmute-core to mavenLocal, then Gradle tests + headless smoke inside Flox |
+| `test` | Publish Java transmute-core (`:transmute-core`) to mavenLocal, then Gradle tests + headless smoke inside Flox |
 
 ## Mermaid validation
 

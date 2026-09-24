@@ -2,7 +2,7 @@ package games.transmute.minicraft;
 
 import TransmuteCore.input.SimulatedInput;
 import TransmuteCore.util.verify.GameHarness;
-import java.awt.event.KeyEvent;
+import TransmuteCore.util.verify.PlaytestScript;
 import java.io.File;
 import minicraft.core.Renderer;
 import minicraft.entity.mob.Player;
@@ -38,25 +38,14 @@ public class SinglePlayerPlaytest {
 
       int startX = player.x;
       int startY = player.y;
+      int staminaBefore = player.stamina;
 
       SimulatedInput input = (SimulatedInput) harness.game().getManager().getInputHandler();
-      input.pressKey(KeyEvent.VK_D);
-      for (int i = 0; i < 30; i++) {
-        harness.step(1);
-      }
-      input.releaseKey(KeyEvent.VK_D);
-      harness.step(2);
+      PlaytestScript.loadClasspath("playtests/move-attack.script").play(harness, input);
 
       Assert.assertTrue(
           "player should move when holding D", player.x != startX || player.y != startY);
-
-      // Attack once: click SPACE, step once, assert stamina spent before recharge.
-      int staminaBefore = player.stamina;
-      input.pressKey(KeyEvent.VK_SPACE);
-      harness.step(1);
-      Assert.assertTrue("attack should spend stamina on click", player.stamina < staminaBefore);
-      input.releaseKey(KeyEvent.VK_SPACE);
-      harness.step(1);
+      Assert.assertTrue("attack should spend stamina", player.stamina < staminaBefore);
 
       // Dig: place rock and mine it with damage until destroyed.
       Level level = SinglePlayerSession.surface();
