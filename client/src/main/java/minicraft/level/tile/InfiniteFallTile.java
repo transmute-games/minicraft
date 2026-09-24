@@ -11,21 +11,22 @@ import minicraft.level.Level;
 
 public class InfiniteFallTile extends Tile {
 
-	protected InfiniteFallTile(String name) {
-		super(name, (SpriteAnimation) null);
-	}
+  protected InfiniteFallTile(String name) {
+    super(name, (SpriteAnimation) null);
+  }
 
-	@Override
-	public void render(Screen screen, Level level, int x, int y) {
-	}
+  @Override
+  public void render(Screen screen, Level level, int x, int y) {}
 
-	@Override
-	public boolean tick(Level level, int xt, int yt) {
-		return false;
-	}
+  @Override
+  public boolean tick(Level level, int xt, int yt) {
+    return false;
+  }
 
-	@Override
-	public boolean mayPass(Level level, int x, int y, Entity e) {
-		return e instanceof AirWizard || e instanceof Arrow || e instanceof Player && Game.isMode("minicraft.settings.mode.creative");
-	}
+  @Override
+  public boolean mayPass(Level level, int x, int y, Entity e) {
+    return e instanceof AirWizard
+        || e instanceof Arrow
+        || e instanceof Player && Game.isMode("minicraft.settings.mode.creative");
+  }
 }

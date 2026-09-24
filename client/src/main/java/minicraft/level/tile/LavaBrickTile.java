@@ -14,34 +14,35 @@ import minicraft.level.Level;
 import minicraft.util.AdvancementElement;
 
 public class LavaBrickTile extends Tile {
-	protected LavaBrickTile(String name) {
-		super(name, new SpriteAnimation(SpriteType.Tile, "missing_tile"));
-	}
+  protected LavaBrickTile(String name) {
+    super(name, new SpriteAnimation(SpriteType.Tile, "missing_tile"));
+  }
 
-	public boolean interact(Level level, int xt, int yt, Player player, Item item, Direction attackDir) {
-		if (item instanceof ToolItem) {
-			ToolItem tool = (ToolItem) item;
-			if (tool.type == ToolType.Pickaxe) {
-				if (player.payStamina(4 - tool.level) && tool.payDurability()) {
-					int data = level.getData(xt, yt);
-					level.setTile(xt, yt, Tiles.get("Lava"));
-					Sound.play("monsterhurt");
-					AdvancementElement.AdvancementTrigger.ItemUsedOnTileTrigger.INSTANCE.trigger(
-						new AdvancementElement.AdvancementTrigger.ItemUsedOnTileTrigger.ItemUsedOnTileTriggerConditionHandler.ItemUsedOnTileTriggerConditions(
-							item, this, data, xt, yt, level.depth));
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+  public boolean interact(
+      Level level, int xt, int yt, Player player, Item item, Direction attackDir) {
+    if (item instanceof ToolItem) {
+      ToolItem tool = (ToolItem) item;
+      if (tool.type == ToolType.Pickaxe) {
+        if (player.payStamina(4 - tool.level) && tool.payDurability()) {
+          int data = level.getData(xt, yt);
+          level.setTile(xt, yt, Tiles.get("Lava"));
+          Sound.play("monsterhurt");
+          AdvancementElement.AdvancementTrigger.ItemUsedOnTileTrigger.INSTANCE.trigger(
+              new AdvancementElement.AdvancementTrigger.ItemUsedOnTileTrigger
+                  .ItemUsedOnTileTriggerConditionHandler.ItemUsedOnTileTriggerConditions(
+                  item, this, data, xt, yt, level.depth));
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
-	public void bumpedInto(Level level, int x, int y, Entity entity) {
-		if (entity instanceof Mob)
-			((Mob) entity).hurt(this, x, y, 3);
-	}
+  public void bumpedInto(Level level, int x, int y, Entity entity) {
+    if (entity instanceof Mob) ((Mob) entity).hurt(this, x, y, 3);
+  }
 
-	public boolean mayPass(Level level, int x, int y, Entity e) {
-		return e.canWool();
-	}
+  public boolean mayPass(Level level, int x, int y, Entity e) {
+    return e.canWool();
+  }
 }

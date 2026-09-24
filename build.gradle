@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 allprojects {
@@ -62,6 +63,21 @@ subprojects {
     }
 }
 
+spotless {
+    encoding 'UTF-8'
+    java {
+        target fileTree(rootDir) {
+            include 'client/src/**/*.java'
+            include 'common/src/**/*.java'
+            include 'server/src/**/*.java'
+        }
+        googleJavaFormat('1.22.0')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
 tasks.register('checkEmptyTypes', Exec) {
     group = 'verification'
     description = 'Fails on empty class/interface/enum stubs'
@@ -76,5 +92,5 @@ tasks.register('deadCodeCheck') {
 }
 
 tasks.named('check').configure {
-    dependsOn 'deadCodeCheck'
+    dependsOn 'deadCodeCheck', 'spotlessCheck'
 }

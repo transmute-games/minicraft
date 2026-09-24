@@ -19,266 +19,290 @@ import minicraft.screen.AchievementsDisplay;
 import org.jetbrains.annotations.Range;
 
 public class ObsidianKnight extends EnemyMob {
-	private static final SpriteLinker.LinkedSprite[][][] armored = new SpriteLinker.LinkedSprite[][][] {
-		Mob.compileMobSpriteAnimations(0, 0, "obsidian_knight_armored"),
-		Mob.compileMobSpriteAnimations(0, 2, "obsidian_knight_armored"),
-		Mob.compileMobSpriteAnimations(0, 4, "obsidian_knight_armored"),
-		Mob.compileMobSpriteAnimations(0, 6, "obsidian_knight_armored")
-	};
-	private static final SpriteLinker.LinkedSprite[][][] broken = new SpriteLinker.LinkedSprite[][][] {
-		Mob.compileMobSpriteAnimations(0, 0, "obsidian_knight_broken"),
-		Mob.compileMobSpriteAnimations(0, 2, "obsidian_knight_broken"),
-		Mob.compileMobSpriteAnimations(0, 4, "obsidian_knight_broken"),
-		Mob.compileMobSpriteAnimations(0, 6, "obsidian_knight_broken")
-	};
-	public static ObsidianKnight entity = null;
+  private static final SpriteLinker.LinkedSprite[][][] armored =
+      new SpriteLinker.LinkedSprite[][][] {
+        Mob.compileMobSpriteAnimations(0, 0, "obsidian_knight_armored"),
+        Mob.compileMobSpriteAnimations(0, 2, "obsidian_knight_armored"),
+        Mob.compileMobSpriteAnimations(0, 4, "obsidian_knight_armored"),
+        Mob.compileMobSpriteAnimations(0, 6, "obsidian_knight_armored")
+      };
+  private static final SpriteLinker.LinkedSprite[][][] broken =
+      new SpriteLinker.LinkedSprite[][][] {
+        Mob.compileMobSpriteAnimations(0, 0, "obsidian_knight_broken"),
+        Mob.compileMobSpriteAnimations(0, 2, "obsidian_knight_broken"),
+        Mob.compileMobSpriteAnimations(0, 4, "obsidian_knight_broken"),
+        Mob.compileMobSpriteAnimations(0, 6, "obsidian_knight_broken")
+      };
+  public static ObsidianKnight entity = null;
 
-	public static final int MaxHealth = 5000;
-	public static boolean beaten = false; // If the boss was beaten
-	public static boolean active = false; // If the boss is active
+  public static final int MaxHealth = 5000;
+  public static boolean beaten = false; // If the boss was beaten
+  public static boolean active = false; // If the boss is active
 
-	@Range(from = 0, to = 1)
-	private int phase = 0; // The phase of the boss. {0, 1}
-	private int attackPhaseCooldown = 0; // Cooldown between attacks
+  @Range(from = 0, to = 1)
+  private int phase = 0; // The phase of the boss. {0, 1}
 
-	private AttackPhase attackPhase = AttackPhase.Attacking;
+  private int attackPhaseCooldown = 0; // Cooldown between attacks
 
-	private enum AttackPhase {Attacking, Dashing, Walking;} // Using fire sparks in attacking.
+  private AttackPhase attackPhase = AttackPhase.Attacking;
 
-	private static final AttackPhase[] ATTACK_PHASES = AttackPhase.values();
+  private enum AttackPhase {
+    Attacking,
+    Dashing,
+    Walking;
+  } // Using fire sparks in attacking.
 
-	private int dashTime = 0;
-	private int dashCooldown = 1000;
+  private static final AttackPhase[] ATTACK_PHASES = AttackPhase.values();
 
-	private int attackDelay = 0;
-	private int attackTime = 0;
-	private int attackLevel = 0; // Attack level is set to 0, as the default.
+  private int dashTime = 0;
+  private int dashCooldown = 1000;
 
-	/**
-	 * Constructor for the ObsidianKnight.
-	 */
-	public ObsidianKnight(int health) {
-		super(1, armored, MaxHealth, false, 16 * 8, -1, 10, 50);
+  private int attackDelay = 0;
+  private int attackTime = 0;
+  private int attackLevel = 0; // Attack level is set to 0, as the default.
 
-		Updater.notifyAll(Localization.getLocalized("minicraft.notification.obsidian_knight_awoken")); // On spawn tell player.
+  /** Constructor for the ObsidianKnight. */
+  public ObsidianKnight(int health) {
+    super(1, armored, MaxHealth, false, 16 * 8, -1, 10, 50);
 
-		active = true;
-		speed = 1;
-		walkTime = 3;
-		this.health = health;
-		entity = this;
+    Updater.notifyAll(
+        Localization.getLocalized(
+            "minicraft.notification.obsidian_knight_awoken")); // On spawn tell player.
 
-		World.levels[World.lvlIdx(-4)].regenerateBossRoom();
-	}
+    active = true;
+    speed = 1;
+    walkTime = 3;
+    this.health = health;
+    entity = this;
 
-	@Override
-	public void tick() {
-		super.tick();
-		Player player = getClosestPlayer();
-		if (player == null || player.isRemoved()) {
-			active = false;
-			KnightStatue ks = new KnightStatue(health);
-			level.add(ks, x, y, false);
-			this.remove();
-			return;
-		}
+    World.levels[World.lvlIdx(-4)].regenerateBossRoom();
+  }
 
-		// Achieve phase 2
-		if (health <= 2500 && phase == 0) { // Assume that phase would not turn back to phase 1
-			phase = 1;
-			lvlSprites = broken; // Refreshing phased sprites
-		}
+  @Override
+  public void tick() {
+    super.tick();
+    Player player = getClosestPlayer();
+    if (player == null || player.isRemoved()) {
+      active = false;
+      KnightStatue ks = new KnightStatue(health);
+      level.add(ks, x, y, false);
+      this.remove();
+      return;
+    }
 
-		if (Game.isMode("minicraft.settings.mode.creative")) return; // Should not attack if player is in creative
+    // Achieve phase 2
+    if (health <= 2500 && phase == 0) { // Assume that phase would not turn back to phase 1
+      phase = 1;
+      lvlSprites = broken; // Refreshing phased sprites
+    }
 
-		if (attackPhaseCooldown == 0) {
-			AttackPhase newPhase;
-			do {
-				newPhase = ATTACK_PHASES[random.nextInt(ATTACK_PHASES.length)];
-			} while (newPhase == attackPhase);
-			attackPhase = newPhase;
-			attackPhaseCooldown = 500;
-		} else {
-			attackPhaseCooldown--;
-		}
+    if (Game.isMode("minicraft.settings.mode.creative"))
+      return; // Should not attack if player is in creative
 
-		if (attackPhase == AttackPhase.Attacking) {
-			if (attackDelay > 0) {
-				xmov = ymov = 0;
-				int dir = (attackDelay - 35) / 4 % 4; // The direction of attack.
-				dir = (dir * 2 % 4) + (dir / 2); // Direction attack changes
-				if (attackDelay < 35)
-					dir = 0; // Direction is reset, if attackDelay is less than 45; prepping for attack.
+    if (attackPhaseCooldown == 0) {
+      AttackPhase newPhase;
+      do {
+        newPhase = ATTACK_PHASES[random.nextInt(ATTACK_PHASES.length)];
+      } while (newPhase == attackPhase);
+      attackPhase = newPhase;
+      attackPhaseCooldown = 500;
+    } else {
+      attackPhaseCooldown--;
+    }
 
-				this.dir = Direction.getDirection(dir);
-				attackDelay--;
-				if (attackDelay == 0) {
-					if (health < maxHealth / 2)
-						attackLevel = 1; // If at 1000 health (50%) or lower, attackLevel = 1
-					if (health < maxHealth / 10)
-						attackLevel = 2; // If at 200 health (10%) or lower, attackLevel = 2
-					attackTime = 120; // attackTime set to 120 (2 seconds, at default 60 ticks/sec)
-				}
+    if (attackPhase == AttackPhase.Attacking) {
+      if (attackDelay > 0) {
+        xmov = ymov = 0;
+        int dir = (attackDelay - 35) / 4 % 4; // The direction of attack.
+        dir = (dir * 2 % 4) + (dir / 2); // Direction attack changes
+        if (attackDelay < 35)
+          dir = 0; // Direction is reset, if attackDelay is less than 45; prepping for attack.
 
-				return; // Skips the rest of the code (attackDelay must have been > 0)
-			}
+        this.dir = Direction.getDirection(dir);
+        attackDelay--;
+        if (attackDelay == 0) {
+          if (health < maxHealth / 2)
+            attackLevel = 1; // If at 1000 health (50%) or lower, attackLevel = 1
+          if (health < maxHealth / 10)
+            attackLevel = 2; // If at 200 health (10%) or lower, attackLevel = 2
+          attackTime = 120; // attackTime set to 120 (2 seconds, at default 60 ticks/sec)
+        }
 
-			// Send out sparks
-			if (attackTime > 0) {
-				xmov = ymov = 0;
-				attackTime--;
-				int attackDir; // The degree of attack. {0, 45, 90, 135, 180, -45, -90, -135}
-				double atan2 = Math.toDegrees(Math.atan2(player.y - y, player.x - x));
-				if (atan2 > 157.5 || atan2 < -157.5) attackDir = 270;
-				else if (atan2 > 112.5) attackDir = 135;
-				else if (atan2 > 67.5) attackDir = 90;
-				else if (atan2 > 22.5) attackDir = 45;
-				else if (atan2 < -112.5) attackDir = -135;
-				else if (atan2 < -67.5) attackDir = -90;
-				else if (atan2 < -22.5) attackDir = -45;
-				else attackDir = 0;
-				double speed = 1 + attackLevel * 0.2 + attackTime / 10D * 0.01; // speed is dependent on the attackType. (higher attackType, faster speeds)
-				// The range of attack is 90 degrees. With little random factor.
-				int phi = attackDir - 36 + (attackTime % 5) * 18 + random.nextInt(7) - 3;
-				level.add(new FireSpark(this, Math.cos(Math.toRadians(phi)) * speed, Math.sin(Math.toRadians(phi)) * speed)); // Adds a spark entity with the cosine and sine of dir times speed.
-				return; // Skips the rest of the code (attackTime was > 0; ie we're attacking.)
-			}
+        return; // Skips the rest of the code (attackDelay must have been > 0)
+      }
 
-			if (player != null && randomWalkTime == 0) { // If there is a player around, and the walking is not random
-				int xd = player.x - x; // The horizontal distance between the player and the Obsidian Knight.
-				int yd = player.y - y; // The vertical distance between the player and the Obsidian Knight.
-				if (xd * xd + yd * yd < 16 * 16 * 2 * 2) {
-					/// Move away from the player if less than 2 blocks away
+      // Send out sparks
+      if (attackTime > 0) {
+        xmov = ymov = 0;
+        attackTime--;
+        int attackDir; // The degree of attack. {0, 45, 90, 135, 180, -45, -90, -135}
+        double atan2 = Math.toDegrees(Math.atan2(player.y - y, player.x - x));
+        if (atan2 > 157.5 || atan2 < -157.5) attackDir = 270;
+        else if (atan2 > 112.5) attackDir = 135;
+        else if (atan2 > 67.5) attackDir = 90;
+        else if (atan2 > 22.5) attackDir = 45;
+        else if (atan2 < -112.5) attackDir = -135;
+        else if (atan2 < -67.5) attackDir = -90;
+        else if (atan2 < -22.5) attackDir = -45;
+        else attackDir = 0;
+        double speed =
+            1
+                + attackLevel * 0.2
+                + attackTime
+                    / 10D
+                    * 0.01; // speed is dependent on the attackType. (higher attackType, faster
+        // speeds)
+        // The range of attack is 90 degrees. With little random factor.
+        int phi = attackDir - 36 + (attackTime % 5) * 18 + random.nextInt(7) - 3;
+        level.add(
+            new FireSpark(
+                this,
+                Math.cos(Math.toRadians(phi)) * speed,
+                Math.sin(Math.toRadians(phi))
+                    * speed)); // Adds a spark entity with the cosine and sine of dir times speed.
+        return; // Skips the rest of the code (attackTime was > 0; ie we're attacking.)
+      }
 
-					this.xmov = 0; // Velocity
-					this.ymov = 0;
+      if (player != null
+          && randomWalkTime == 0) { // If there is a player around, and the walking is not random
+        int xd =
+            player.x - x; // The horizontal distance between the player and the Obsidian Knight.
+        int yd = player.y - y; // The vertical distance between the player and the Obsidian Knight.
+        if (xd * xd + yd * yd < 16 * 16 * 2 * 2) {
+          /// Move away from the player if less than 2 blocks away
 
-					// These four statements basically just find which direction is away from the player:
-					if (xd < 0) this.xmov = +1;
-					if (xd > 0) this.xmov = -1;
-					if (yd < 0) this.ymov = +1;
-					if (yd > 0) this.ymov = -1;
+          this.xmov = 0; // Velocity
+          this.ymov = 0;
 
-				} else if (xd * xd + yd * yd > 16 * 16 * 15 * 15) {// 15 squares away
-					/// Drags the Obsidian Knight to the player, maintaining relative position.
-					double hypot = Math.sqrt(xd * xd + yd * yd);
-					int newxd = (int) (xd * Math.sqrt(16 * 16 * 15 * 15) / hypot);
-					int newyd = (int) (yd * Math.sqrt(16 * 16 * 15 * 15) / hypot);
-					x = player.x - newxd;
-					y = player.y - newyd;
-				}
+          // These four statements basically just find which direction is away from the player:
+          if (xd < 0) this.xmov = +1;
+          if (xd > 0) this.xmov = -1;
+          if (yd < 0) this.ymov = +1;
+          if (yd > 0) this.ymov = -1;
 
-				xd = player.x - x; // Recalculate these two
-				yd = player.y - y;
-				// If a random number, 0-3, equals 0, and the player is less than 50 blocks away, and attackDelay and attackTime equal 0...
-				if (random.nextInt(4) == 0 && xd * xd + yd * yd < 50 * 50 && attackDelay == 0 && attackTime == 0) {
-					attackDelay = 60 * 2; // ...then set attackDelay to 120 (2 seconds at default 60 ticks/sec)
-				}
-			}
-			// AttackPhase.Walking is handled by Mob.java like normal mob.
-		} else if (phase == 1) { // AttackPhase.Dashing is handled here only in second phase. Otherwise, it is handled as same as AttackPhase.Walking.
-			if (attackPhase == AttackPhase.Dashing) {
-				if (dashCooldown < 1) {
-					dashTime = 40;
-					dashCooldown = 250;
-				} else {
-					dashCooldown--;
-				}
-				if (dashTime == 0) {
-					this.speed = 1;
-					dashCooldown--; // We want cooldown
-				}
+        } else if (xd * xd + yd * yd > 16 * 16 * 15 * 15) { // 15 squares away
+          /// Drags the Obsidian Knight to the player, maintaining relative position.
+          double hypot = Math.sqrt(xd * xd + yd * yd);
+          int newxd = (int) (xd * Math.sqrt(16 * 16 * 15 * 15) / hypot);
+          int newyd = (int) (yd * Math.sqrt(16 * 16 * 15 * 15) / hypot);
+          x = player.x - newxd;
+          y = player.y - newyd;
+        }
 
-				if (dashTime > 0) {
-					dashTime--;
-					this.speed = 2;
-					level.add(new FireSpark(this, 0, 0)); // Fiery trail
-				}
-			}
-		}
-	}
+        xd = player.x - x; // Recalculate these two
+        yd = player.y - y;
+        // If a random number, 0-3, equals 0, and the player is less than 50 blocks away, and
+        // attackDelay and attackTime equal 0...
+        if (random.nextInt(4) == 0
+            && xd * xd + yd * yd < 50 * 50
+            && attackDelay == 0
+            && attackTime == 0) {
+          attackDelay =
+              60 * 2; // ...then set attackDelay to 120 (2 seconds at default 60 ticks/sec)
+        }
+      }
+      // AttackPhase.Walking is handled by Mob.java like normal mob.
+    } else if (phase
+        == 1) { // AttackPhase.Dashing is handled here only in second phase. Otherwise, it is
+      // handled as same as AttackPhase.Walking.
+      if (attackPhase == AttackPhase.Dashing) {
+        if (dashCooldown < 1) {
+          dashTime = 40;
+          dashCooldown = 250;
+        } else {
+          dashCooldown--;
+        }
+        if (dashTime == 0) {
+          this.speed = 1;
+          dashCooldown--; // We want cooldown
+        }
 
-	@Override
-	public void doHurt(int damage, Direction attackDir) {
-		super.doHurt(damage, attackDir);
-		if (attackDelay == 0 && attackTime == 0) {
-			attackDelay = 60 * 2;
-		}
-	}
+        if (dashTime > 0) {
+          dashTime--;
+          this.speed = 2;
+          level.add(new FireSpark(this, 0, 0)); // Fiery trail
+        }
+      }
+    }
+  }
 
-	@Override
-	public void render(Screen screen) {
-		super.render(screen);
+  @Override
+  public void doHurt(int damage, Direction attackDir) {
+    super.doHurt(damage, attackDir);
+    if (attackDelay == 0 && attackTime == 0) {
+      attackDelay = 60 * 2;
+    }
+  }
 
-		int textcol = Color.get(1, 0, 204, 0);
-		int textcol2 = Color.get(1, 0, 51, 0);
-		int percent = health / (maxHealth / 100);
-		String h = percent + "%";
+  @Override
+  public void render(Screen screen) {
+    super.render(screen);
 
-		if (percent < 1) h = "1%";
+    int textcol = Color.get(1, 0, 204, 0);
+    int textcol2 = Color.get(1, 0, 51, 0);
+    int percent = health / (maxHealth / 100);
+    String h = percent + "%";
 
-		if (percent < 16) {
-			textcol = Color.get(1, 204, 0, 0);
-			textcol2 = Color.get(1, 51, 0, 0);
-		} else if (percent < 51) {
-			textcol = Color.get(1, 204, 204, 9);
-			textcol2 = Color.get(1, 51, 51, 0);
-		}
-		int textwidth = Font.textWidth(h);
-		Font.draw(h, screen, (x - textwidth / 2) + 1, y - 17, textcol2);
-		Font.draw(h, screen, (x - textwidth / 2), y - 18, textcol);
-	}
+    if (percent < 1) h = "1%";
 
-	@Override
-	protected void touchedBy(Entity entity) {
-		if (entity instanceof Player) {
-			// If the entity is the Player, then deal them 2 damage points.
-			((Player) entity).hurt(this, 2);
-			if (attackPhase == AttackPhase.Dashing) {
-				dashTime = Math.max(dashTime - 10, 0);
-			}
-		}
-	}
+    if (percent < 16) {
+      textcol = Color.get(1, 204, 0, 0);
+      textcol2 = Color.get(1, 51, 0, 0);
+    } else if (percent < 51) {
+      textcol = Color.get(1, 204, 204, 9);
+      textcol2 = Color.get(1, 51, 51, 0);
+    }
+    int textwidth = Font.textWidth(h);
+    Font.draw(h, screen, (x - textwidth / 2) + 1, y - 17, textcol2);
+    Font.draw(h, screen, (x - textwidth / 2), y - 18, textcol);
+  }
 
-	/**
-	 * What happens when the obsidian knight dies
-	 */
-	@Override
-	public void die() {
-		Player[] players = level.getPlayers();
-		if (players.length > 0) { // If the player is still here
-			for (Player p : players) {
-				p.addScore(300000); // Give the player 300K points.
-				dropItem(15, 25, Items.get("shard"));
-				dropItem(1, 1, Items.get("Obsidian Heart")); // Drop it's precious item.
-			}
-		}
+  @Override
+  protected void touchedBy(Entity entity) {
+    if (entity instanceof Player) {
+      // If the entity is the Player, then deal them 2 damage points.
+      ((Player) entity).hurt(this, 2);
+      if (attackPhase == AttackPhase.Dashing) {
+        dashTime = Math.max(dashTime - 10, 0);
+      }
+    }
+  }
 
-		Sound.play("bossdeath");
+  /** What happens when the obsidian knight dies */
+  @Override
+  public void die() {
+    Player[] players = level.getPlayers();
+    if (players.length > 0) { // If the player is still here
+      for (Player p : players) {
+        p.addScore(300000); // Give the player 300K points.
+        dropItem(15, 25, Items.get("shard"));
+        dropItem(1, 1, Items.get("Obsidian Heart")); // Drop it's precious item.
+      }
+    }
 
-		Updater.notifyAll(Localization.getLocalized("minicraft.notification.obsidian_knight_defeated"));
+    Sound.play("bossdeath");
 
+    Updater.notifyAll(Localization.getLocalized("minicraft.notification.obsidian_knight_defeated"));
 
-		// If this is the first time we beat the obsidian knight.
-		if (!beaten) {
-			AchievementsDisplay.setAchievement("minicraft.achievement.obsidianknight", true);
+    // If this is the first time we beat the obsidian knight.
+    if (!beaten) {
+      AchievementsDisplay.setAchievement("minicraft.achievement.obsidianknight", true);
+    }
 
-		}
+    beaten = true;
+    active = false;
+    entity = null;
 
-		beaten = true;
-		active = false;
-		entity = null;
+    super.die(); // Calls the die() method in EnemyMob.java
+  }
 
-		super.die(); // Calls the die() method in EnemyMob.java
-	}
+  @Override
+  public int calculateEntityDamage(Entity attacker, int damage) {
+    if (attacker instanceof Arrow && phase == 0) {
+      attacker.remove();
+      return 0;
+    }
 
-	@Override
-	public int calculateEntityDamage(Entity attacker, int damage) {
-		if (attacker instanceof Arrow && phase == 0) {
-			attacker.remove();
-			return 0;
-		}
-
-		return super.calculateEntityDamage(attacker, damage);
-	}
+    return super.calculateEntityDamage(attacker, damage);
+  }
 }

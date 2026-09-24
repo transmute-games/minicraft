@@ -11,72 +11,95 @@ import org.jetbrains.annotations.Nullable;
 
 class InventoryMenu extends ItemListMenu {
 
-	private final RelPos entryPos; // Used for copy constructor
-	private final String title; // Used for copy constructor
-	private final Inventory inv;
-	private final Entity holder;
-	private final boolean creativeInv;
-	private final @Nullable Action onStackUpdateListener; // The length of the entry shown may change when there is an update to the stack.
+  private final RelPos entryPos; // Used for copy constructor
+  private final String title; // Used for copy constructor
+  private final Inventory inv;
+  private final Entity holder;
+  private final boolean creativeInv;
+  private final @Nullable Action
+      onStackUpdateListener; // The length of the entry shown may change when there is an update to
 
-	InventoryMenu(Entity holder, Inventory inv, String title, RelPos entryPos, @Nullable Action onStackUpdateListener) { this(holder, inv, title, entryPos, false, onStackUpdateListener); }
-	InventoryMenu(Entity holder, Inventory inv, String title, RelPos entryPos, boolean creativeInv) { this(holder, inv, title, entryPos, creativeInv, null); }
-	InventoryMenu(Entity holder, Inventory inv, String title, RelPos entryPos, boolean creativeInv, @Nullable Action onStackUpdateListener) {
-		super(ItemListMenu.getBuilder(entryPos), ItemEntry.useItems(inv.getItems()), title);
-		this.inv = inv;
-		this.holder = holder;
-		this.title = title;
-		this.entryPos = entryPos;
-		this.creativeInv = creativeInv;
-		this.onStackUpdateListener = onStackUpdateListener;
-	}
+  // the stack.
 
-	InventoryMenu(InventoryMenu model) {
-		super(ItemListMenu.getBuilder(model.entryPos), ItemEntry.useItems(model.inv.getItems()), model.title);
-		this.inv = model.inv;
-		this.holder = model.holder;
-		this.creativeInv = model.creativeInv;
-		this.title = model.title;
-		this.entryPos = model.entryPos;
-		this.onStackUpdateListener = model.onStackUpdateListener;
-		setSelection(model.getSelection());
-	}
+  InventoryMenu(
+      Entity holder,
+      Inventory inv,
+      String title,
+      RelPos entryPos,
+      @Nullable Action onStackUpdateListener) {
+    this(holder, inv, title, entryPos, false, onStackUpdateListener);
+  }
 
-	@Override
-	public void tick(InputHandler input) {
-		super.tick(input);
+  InventoryMenu(Entity holder, Inventory inv, String title, RelPos entryPos, boolean creativeInv) {
+    this(holder, inv, title, entryPos, creativeInv, null);
+  }
 
-		boolean dropOne = input.inputPressed("drop-one");
+  InventoryMenu(
+      Entity holder,
+      Inventory inv,
+      String title,
+      RelPos entryPos,
+      boolean creativeInv,
+      @Nullable Action onStackUpdateListener) {
+    super(ItemListMenu.getBuilder(entryPos), ItemEntry.useItems(inv.getItems()), title);
+    this.inv = inv;
+    this.holder = holder;
+    this.title = title;
+    this.entryPos = entryPos;
+    this.creativeInv = creativeInv;
+    this.onStackUpdateListener = onStackUpdateListener;
+  }
 
-		if (getNumOptions() > 0 && (dropOne || input.inputPressed("drop-stack"))) {
-			ItemEntry entry = ((ItemEntry) getCurEntry());
-			if (entry == null) return;
-			Item invItem = entry.getItem();
-			Item drop = invItem.copy();
+  InventoryMenu(InventoryMenu model) {
+    super(
+        ItemListMenu.getBuilder(model.entryPos),
+        ItemEntry.useItems(model.inv.getItems()),
+        model.title);
+    this.inv = model.inv;
+    this.holder = model.holder;
+    this.creativeInv = model.creativeInv;
+    this.title = model.title;
+    this.entryPos = model.entryPos;
+    this.onStackUpdateListener = model.onStackUpdateListener;
+    setSelection(model.getSelection());
+  }
 
-			if (!creativeInv) {
-				if (!dropOne || !(drop instanceof StackableItem) || ((StackableItem) drop).count <= 1) {
-					// drop the whole item.
-					removeSelectedEntry();
-				} else {
-					// just drop one from the stack
-					((StackableItem) drop).count = 1;
-					((StackableItem) invItem).count--;
-				}
+  @Override
+  public void tick(InputHandler input) {
+    super.tick(input);
 
-				if (onStackUpdateListener != null) {
-					onStackUpdateListener.act();
-				}
-			}
+    boolean dropOne = input.inputPressed("drop-one");
 
-			if (holder.getLevel() != null) {
-				holder.getLevel().dropItem(holder.x, holder.y, drop);
-			}
-		}
-	}
+    if (getNumOptions() > 0 && (dropOne || input.inputPressed("drop-stack"))) {
+      ItemEntry entry = ((ItemEntry) getCurEntry());
+      if (entry == null) return;
+      Item invItem = entry.getItem();
+      Item drop = invItem.copy();
 
-	@Override
-	public void removeSelectedEntry() {
-		inv.remove(getSelection());
-		super.removeSelectedEntry();
-	}
+      if (!creativeInv) {
+        if (!dropOne || !(drop instanceof StackableItem) || ((StackableItem) drop).count <= 1) {
+          // drop the whole item.
+          removeSelectedEntry();
+        } else {
+          // just drop one from the stack
+          ((StackableItem) drop).count = 1;
+          ((StackableItem) invItem).count--;
+        }
+
+        if (onStackUpdateListener != null) {
+          onStackUpdateListener.act();
+        }
+      }
+
+      if (holder.getLevel() != null) {
+        holder.getLevel().dropItem(holder.x, holder.y, drop);
+      }
+    }
+  }
+
+  @Override
+  public void removeSelectedEntry() {
+    inv.remove(getSelection());
+    super.removeSelectedEntry();
+  }
 }

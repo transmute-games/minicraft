@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: spotless-java
+        name: Format Java (Spotless / google-java-format)
+        entry: ./gradlew spotlessApply --quiet
+        language: system
+        pass_filenames: false
+        files: \.java$
+        stages: [pre-commit]

@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class UnknownItem extends StackableItem {
 
-	protected UnknownItem(String reqName) {
-		super(reqName, SpriteLinker.missingTexture(SpriteType.Item));
-	}
+  protected UnknownItem(String reqName) {
+    super(reqName, SpriteLinker.missingTexture(SpriteType.Item));
+  }
 
-	public @NotNull UnknownItem copy() {
-		return new UnknownItem(getName());
-	}
+  public @NotNull UnknownItem copy() {
+    return new UnknownItem(getName());
+  }
 }

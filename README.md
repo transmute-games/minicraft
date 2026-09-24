@@ -32,7 +32,14 @@ Headless smoke:
 
 ```bash
 ./gradlew :client:verifyHeadless
-./gradlew deadCodeCheck test
+./gradlew spotlessCheck deadCodeCheck test
+```
+
+### Format Java
+
+```bash
+pre-commit install          # once per clone
+./gradlew spotlessApply     # google-java-format
 ```
 
 ## Architecture
