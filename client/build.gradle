@@ -1,0 +1,32 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':common')
+    implementation 'games.transmute:transmute-core:1.0.0'
+
+    implementation 'org.json:json:20240303'
+    implementation 'com.konghq:unirest-java:3.14.5'
+    // Controllers (optional at runtime; InputHandler degrades if SDL fails)
+    implementation 'com.badlogicgames.jamepad:jamepad:2.0.20.0'
+}
+
+application {
+    mainClass = 'games.transmute.minicraft.MinicraftGame'
+}
+
+run {
+    workingDir = rootProject.projectDir
+}
+
+tasks.register('verifyHeadless', JavaExec) {
+    group = 'verification'
+    description = 'Runs MinicraftGame --headless smoke'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'games.transmute.minicraft.MinicraftGame'
+    args = ['--headless']
+    workingDir = rootProject.projectDir
+}
+
+check.dependsOn verifyHeadless

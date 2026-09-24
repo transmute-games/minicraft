@@ -1,0 +1,14 @@
+.gradle/
+build/
+**/build/
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.DS_Store
+*.class
+*.log
+_online_stash/
+local.properties
+client/logs/

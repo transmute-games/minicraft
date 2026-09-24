@@ -1,0 +1,5 @@
+rootProject.name = 'minicraft'
+
+include 'common'
+include 'client'
+include 'server'

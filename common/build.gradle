@@ -1,0 +1,3 @@
+dependencies {
+    // Shared protocol + persistence helpers (no transmute dependency).
+}

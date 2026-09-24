@@ -1,0 +1,18 @@
+# NOTICE
+
+## Minicraft+ / Minicraft+ Online
+
+This product includes software adapted from:
+
+- MinicraftPlus/minicraft-plus-revived (branch `2.3.0-dev`)
+  https://github.com/MinicraftPlus/minicraft-plus-revived
+- ElVir-Software/minicraft-plus-online (protocol / multiplayer reference)
+  https://github.com/ElVir-Software/minicraft-plus-online
+
+Licensed under the GNU General Public License v3.0. See `LICENSE` and `Credits.md`.
+
+## transmute-core
+
+This product depends on transmute-core (games.transmute:transmute-core),
+licensed under the PolyForm Shield License 1.0.0.
+https://github.com/transmute-games/transmute-core
