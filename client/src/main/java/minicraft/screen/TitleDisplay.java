@@ -230,9 +230,9 @@ public class TitleDisplay extends Display {
         Localization.getLocalized(
             "minicraft.displays.title.display.help.2", Game.input.getMapping("exit"));
 
-    Font.drawCentered(upString, screen, Screen.h - 30, Color.DARK_GRAY);
-    Font.drawCentered(selectString, screen, Screen.h - 20, Color.DARK_GRAY);
-    Font.drawCentered(exitString, screen, Screen.h - 10, Color.DARK_GRAY);
+    Font.drawCentered(upString, screen, Screen.h - 36, Color.DARK_GRAY);
+    Font.drawCentered(selectString, screen, Screen.h - 26, Color.DARK_GRAY);
+    Font.drawCentered(exitString, screen, Screen.h - 16, Color.DARK_GRAY);
   }
 
   private static final String[] splashes = {

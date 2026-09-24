@@ -603,11 +603,10 @@ public class InputHandler implements KeyListener {
     keytext = keytext.toUpperCase();
 
     if (keyboard.containsKey(keytext)) return keyboard.get(keytext);
-    else {
-      // System.out.println("UNKNOWN KEYBOARD KEY: " + keytext); // it's okay really; was just
-      // checking
-      return new PhysicalKey(); // Won't matter where I'm calling it.
-    }
+    // Register on first use so Transmute injectKey / compound binds (SHIFT-D, etc.) stick.
+    PhysicalKey key = new PhysicalKey();
+    keyboard.put(keytext, key);
+    return key;
   }
 
   // Called by KeyListener Event methods, below. Only accesses keyboard Keys.
