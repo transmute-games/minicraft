@@ -8,3 +8,16 @@ repos:
         pass_filenames: false
         files: \.java$
         stages: [pre-commit]
+      - id: markdownlint
+        name: markdownlint-cli2
+        entry: markdownlint-cli2
+        language: system
+        types: [markdown]
+        stages: [pre-commit]
+      - id: mermaid
+        name: Validate Mermaid diagrams
+        entry: ./scripts/check-mermaid.sh
+        language: system
+        pass_filenames: false
+        files: \.md$
+        stages: [pre-commit]

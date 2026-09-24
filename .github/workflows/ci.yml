@@ -4,32 +4,63 @@ on:
   push:
     branches: [master, main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
+env:
+  FLOX_VERSION: '1.16.0'
+
 jobs:
-  test:
+  docs:
+    name: docs (markdown + mermaid)
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
+      - uses: flox/install-flox-action@v2
+      - name: Install Chromium for Mermaid render
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends chromium-browser \
+            || sudo apt-get install -y --no-install-recommends chromium
+      - name: Lint markdown and validate Mermaid
+        run: |
+          flox activate -- bash -lc '
+            set -euo pipefail
+            markdownlint-cli2
+            ./scripts/check-mermaid.sh
+          '
+
+  quality:
+    name: quality (format + dead code)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flox/install-flox-action@v2
+      - name: Spotless + deadCodeCheck
+        run: flox activate -- ./gradlew spotlessCheck deadCodeCheck --no-daemon
+
+  test:
+    name: test (junit + headless)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flox/install-flox-action@v2
       - name: Publish transmute-core to mavenLocal
         run: |
-          git clone --depth 1 https://github.com/transmute-games/transmute-core.git /tmp/transmute-core
-          cd /tmp/transmute-core
-          ./gradlew :transmute-core:publishToMavenLocal --no-daemon
-      - name: Java format
-        run: ./gradlew spotlessCheck --no-daemon
-      - name: Dead code checks
-        run: ./gradlew deadCodeCheck --no-daemon
+          flox activate -- bash -lc '
+            set -euo pipefail
+            git clone --depth 1 https://github.com/transmute-games/transmute-core.git /tmp/transmute-core
+            cd /tmp/transmute-core
+            ./gradlew :transmute-core:publishToMavenLocal --no-daemon
+          '
       - name: Test
-        run: ./gradlew test :client:verifyHeadless --no-daemon
+        run: flox activate -- ./gradlew test :client:verifyHeadless --no-daemon

@@ -1,0 +1,24 @@
+{
+  "globs": [
+    "README.md",
+    "AGENTS.md",
+    "docs/**/*.md"
+  ],
+  "ignores": [
+    "**/.flox/**",
+    "**/node_modules/**",
+    "**/build/**",
+    "CHANGELOG.md",
+    "Credits.md",
+    "LICENSE"
+  ],
+  "config": {
+    "MD013": false,
+    "MD033": false,
+    "MD041": false,
+    "MD024": false,
+    "MD029": false,
+    "MD046": false,
+    "MD060": false
+  }
+}

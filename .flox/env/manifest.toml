@@ -1,0 +1,54 @@
+schema-version = "1.16.0"
+
+## Dev toolchain for Minicraft (transmute-games)
+## Activate with: flox activate
+## Run one-off:   flox activate -- ./gradlew test
+
+[install]
+temurin-bin-17.pkg-path = "temurin-bin-17"
+git.pkg-path = "git"
+gh.pkg-path = "gh"
+pre-commit.pkg-path = "pre-commit"
+markdownlint-cli2.pkg-path = "markdownlint-cli2"
+mermaid-cli.pkg-path = "mermaid-cli"
+
+[vars]
+# Default dedicated-server listen port used in docs/examples.
+MINICRAFT_PORT = "4225"
+
+[hook]
+on-activate = '''
+  cd "$FLOX_ENV_PROJECT" || exit 1
+
+  # Ensure Gradle wrapper is executable when checking out on Windows→Unix.
+  if [ -f ./gradlew ] && [ ! -x ./gradlew ]; then
+    chmod +x ./gradlew
+  fi
+
+  # Keep local git hooks wired when pre-commit is available.
+  if command -v pre-commit >/dev/null 2>&1 && [ -f .pre-commit-config.yaml ]; then
+    if [ ! -f .git/hooks/pre-commit ] || ! grep -q 'pre-commit' .git/hooks/pre-commit 2>/dev/null; then
+      pre-commit install >/dev/null 2>&1 || true
+    fi
+  fi
+
+  echo "minicraft flox env ready — java=$(java -version 2>&1 | head -1)"
+  echo "  flox activate -- ./gradlew :client:run"
+  echo "  flox activate -- ./gradlew spotlessCheck deadCodeCheck test"
+'''
+
+[profile]
+common = '''
+  alias mc-test='./gradlew spotlessCheck deadCodeCheck test :client:verifyHeadless'
+  alias mc-run='./gradlew :client:run'
+  alias mc-server='./gradlew :server:run --args="--port ${MINICRAFT_PORT:-4225}"'
+  alias mc-fmt='./gradlew spotlessApply'
+  alias mc-docs='markdownlint-cli2 && ./scripts/check-mermaid.sh'
+'''
+
+[options]
+systems = [
+  "aarch64-darwin",
+  "aarch64-linux",
+  "x86_64-linux",
+]
