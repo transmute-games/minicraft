@@ -1,7 +1,5 @@
 package minicraft.core;
 
-import kong.unirest.Empty;
-import kong.unirest.HttpResponse;
 import minicraft.core.CrashHandler.ErrorInfo.ErrorType;
 import minicraft.core.io.ClipboardHandler;
 import minicraft.network.Analytics;
@@ -47,7 +45,7 @@ public class CrashHandler {
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);
 
-		Future<HttpResponse<Empty>> ping = Analytics.Crashes.ping();
+		Future<?> ping = Analytics.Crashes.ping();
 
 		// Ensure ping finishes before program closes.
 		if (GraphicsEnvironment.isHeadless() && ping != null) {
@@ -129,7 +127,7 @@ public class CrashHandler {
 		PrintWriter printer = new PrintWriter(string);
 		throwable.printStackTrace(printer);
 
-		Future<HttpResponse<Empty>> ping = Analytics.Crashes.ping();
+		Future<?> ping = Analytics.Crashes.ping();
 
 		// Ensure ping finishes before program closes.
 		if (GraphicsEnvironment.isHeadless() && ping != null) {
@@ -214,7 +212,7 @@ public class CrashHandler {
 		return panel;
 	}
 
-	private static JPanel getErrorPanel(ErrorInfo info, JScrollPane errorPane, JDialog dialog, String stackTrace, Action callback, Future<HttpResponse<Empty>> ping) {
+	private static JPanel getErrorPanel(ErrorInfo info, JScrollPane errorPane, JDialog dialog, String stackTrace, Action callback, Future<?> ping) {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(errorPane);
 		JPanel buttonPanel = new JPanel();

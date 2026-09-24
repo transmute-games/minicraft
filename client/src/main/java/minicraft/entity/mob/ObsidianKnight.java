@@ -256,7 +256,6 @@ public class ObsidianKnight extends EnemyMob {
 
 		Sound.play("bossdeath");
 
-		//Analytics.AirWizardDeath.ping();
 		Updater.notifyAll(Localization.getLocalized("minicraft.notification.obsidian_knight_defeated"));
 
 
@@ -264,7 +263,6 @@ public class ObsidianKnight extends EnemyMob {
 		if (!beaten) {
 			AchievementsDisplay.setAchievement("minicraft.achievement.obsidianknight", true);
 
-			//Analytics.FirstAirWizardDeath.ping();
 		}
 
 		beaten = true;

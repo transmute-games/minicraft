@@ -5,13 +5,8 @@ import minicraft.core.io.Settings;
 import minicraft.core.io.Sound;
 import minicraft.entity.mob.Player;
 import minicraft.level.Level;
-import minicraft.level.tile.Tiles;
-import minicraft.network.Analytics;
-import minicraft.saveload.Load;
 import minicraft.saveload.Version;
 import minicraft.screen.Display;
-import minicraft.screen.ResourcePackDisplay;
-import minicraft.screen.TitleDisplay;
 import minicraft.util.Logging;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,54 +86,7 @@ public class Game {
 		running = false;
 	}
 
-
 	public static void main(String[] args) {
-		// Prefer Transmute-backed entry.
 		games.transmute.minicraft.MinicraftGame.main(args);
-	}
-
-	/** Legacy AWT main (unused when launched via MinicraftGame). */
-	public static void legacyMain(String[] args) {
-		Thread.setDefaultUncaughtExceptionHandler(CrashHandler::crashHandle);
-
-		Initializer.parseArgs(args); // Parses the command line arguments
-		// Applying Game#debug first.
-
-		Analytics.GameStartup.ping();
-
-		new Load(true, true); // This loads basic saved preferences.
-		// Reference: https://stackoverflow.com/a/13832805
-		if ((boolean) Settings.get("hwa")) System.setProperty("sun.java2d.opengl", "true");
-		MAX_FPS = (int) Settings.get("fps"); // DO NOT put this above.
-
-		input = new InputHandler(Renderer.canvas);
-
-		ResourcePackDisplay.initPacks();
-		ResourcePackDisplay.reloadResources();
-
-		Tiles.initTileList();
-
-		// Load the selected language.
-		Initializer.createAndDisplayFrame();
-
-		setDisplay(new TitleDisplay()); // Sets menu to the title screen.
-
-		Renderer.initScreen();
-
-		World.resetGame(); // "half"-starts a new game, to set up initial variables
-		player.eid = 0;
-		new Load(true, false); // This loads any saved preferences.
-
-		// Update fullscreen frame if Updater.FULLSCREEN was updated previously
-		if (Updater.FULLSCREEN) {
-			Updater.updateFullscreen();
-		}
-
-		Initializer.launchWindow();
-		// Actually start the game.
-		Initializer.run();
-
-		Logging.GAMEHANDLER.debug("Main game loop ended; Terminating application...");
-		System.exit(0);
 	}
 }

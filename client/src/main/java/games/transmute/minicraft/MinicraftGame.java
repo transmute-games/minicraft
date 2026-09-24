@@ -6,7 +6,6 @@ import TransmuteCore.core.Manager;
 import TransmuteCore.core.TransmuteCore;
 import TransmuteCore.core.interfaces.services.IRenderer;
 import TransmuteCore.graphics.Context;
-import TransmuteCore.input.Input;
 import TransmuteCore.util.verify.FrameAssert;
 import TransmuteCore.util.verify.GameHarness;
 import minicraft.core.Game;

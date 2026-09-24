@@ -1,7 +1,5 @@
 package minicraft.network;
 
-import kong.unirest.Empty;
-import kong.unirest.HttpResponse;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,12 +29,12 @@ public enum Analytics {
 	MultiplayerDeath;
 
 	@Nullable
-	public Future<HttpResponse<Empty>> ping() {
+	public Future<?> ping() {
 		return ping(1);
 	}
 
 	@Nullable
-	public Future<HttpResponse<Empty>> ping(int value) {
+	public Future<?> ping(int value) {
 		return CompletableFuture.completedFuture(null);
 	}
 }
