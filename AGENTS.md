@@ -13,10 +13,11 @@ Docs live under [`docs/`](docs/README.md). Keep the root README slim.
 ## Authoring seam
 
 - Entry: `games.transmute.minicraft.MinicraftGame` extends `TransmuteCore`.
-- Config: logical framebuffer `.size(VIEW_W, VIEW_H)` + `.scale(SCALE)` (not pre-multiplied).
+- Config: `.size(VIEW_W * SCALE, VIEW_H * SCALE).scale(1)` so the window is 3× not 9×
+  (Transmute applies `size * scale` for the window); render nearest-neighbor upscales into Context.
 - Bootstrap: `minicraft.core.GameBootstrap` (no Swing window).
 - Input: `InputBridge` copies Transmute/`SimulatedInput` into Minicraft `InputHandler`.
-- Render: `Renderer.renderFrame()` → blit into `Context` pixels.
+- Render: `Renderer.renderFrame()` → blit/upscale into `Context` pixels.
 - Do not replace Minicraft `Level`/`Entity` with transmute `World` for full fidelity.
 - Prefer `PlaytestScript` for scripted input slices in headless tests.
 

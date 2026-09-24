@@ -292,14 +292,16 @@ public class Renderer extends Game {
 
   /** Renders the main game GUI (hearts, Stamina bolts, name of the current item, etc.) */
   private static void renderGui() {
-    // This draws the black square where the selected item would be if you were holding it
+    // Full-width backdrop so hearts / stamina / item / hunger share one clean bar.
     if (!isMode("minicraft.settings.mode.creative") || player.activeItem != null) {
-      for (int x = 10; x < 26; x++) {
-        screen.render(x * 8, Screen.h - 8, 5, 2, 0, hudSheet.getSheet());
+      for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < Screen.w / 8; x++) {
+          screen.render(x * 8, Screen.h - 16 + y * 8, 5, 2, 0, hudSheet.getSheet());
+        }
       }
     }
 
-    // Shows active item sprite and name in bottom toolbar.
+    // Held-item sprite + name on the toolbar.
     if (player.activeItem != null) {
       player.activeItem.renderHUD(screen, 10 * 8, Screen.h - 8, Color.WHITE);
     }

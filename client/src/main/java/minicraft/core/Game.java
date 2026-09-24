@@ -78,8 +78,20 @@ public class Game {
 
   static boolean running = true;
 
+  /** Optional hook so Transmute (or tests) can stop the real game loop. */
+  private static Runnable quitAction;
+
+  public static void setQuitAction(@Nullable Runnable action) {
+    quitAction = action;
+  }
+
   public static void quit() {
     running = false;
+    if (quitAction != null) {
+      quitAction.run();
+    } else {
+      System.exit(0);
+    }
   }
 
   public static void main(String[] args) {

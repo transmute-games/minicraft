@@ -206,6 +206,8 @@ public class WorldSelectDisplay extends Display {
           new PopupDisplay(
               new PopupDisplay.PopupConfig(null, callbacks, 0), entries.toArray(new ListEntry[0])));
     } else if (input.getMappedKey("SHIFT-D").isClicked()
+        || input.getMappedKey("DELETE").isClicked()
+        || input.getMappedKey("BACKSPACE").isClicked()
         || input.leftTriggerPressed() && input.rightTriggerPressed()) {
       ArrayList<ListEntry> entries = new ArrayList<>();
       entries.addAll(
@@ -301,17 +303,19 @@ public class WorldSelectDisplay extends Display {
           col);
     }
 
+    // Keep a bottom margin so the delete hint isn't clipped by window/canvas packing.
+    int helpY = Screen.h - 20;
     Font.drawCentered(
         Localization.getLocalized(
             "minicraft.displays.world_select.display.help.0", Game.input.getMapping("select")),
         screen,
-        Screen.h - 60,
+        helpY - 40,
         Color.GRAY);
     Font.drawCentered(
         Localization.getLocalized(
             "minicraft.displays.world_select.display.help.1", Game.input.getMapping("exit")),
         screen,
-        Screen.h - 40,
+        helpY - 32,
         Color.GRAY);
 
     Font.drawCentered(
@@ -319,21 +323,21 @@ public class WorldSelectDisplay extends Display {
             "minicraft.displays.world_select.display.help.2",
             Game.input.selectMapping("SHIFT-C", "LEFTBUMPER")),
         screen,
-        Screen.h - 24,
+        helpY - 16,
         Color.BLUE);
     Font.drawCentered(
         Localization.getLocalized(
             "minicraft.displays.world_select.display.help.3",
             Game.input.selectMapping("SHIFT-R", "RIGHTBUMPER")),
         screen,
-        Screen.h - 16,
+        helpY - 8,
         Color.GREEN);
     Font.drawCentered(
         Localization.getLocalized(
             "minicraft.displays.world_select.display.help.4",
             Game.input.selectMapping("SHIFT-D", "LEFTRIGHTTRIGGER")),
         screen,
-        Screen.h - 8,
+        helpY,
         Color.RED);
 
     Font.drawCentered(

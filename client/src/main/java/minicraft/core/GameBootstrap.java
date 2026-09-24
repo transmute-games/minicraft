@@ -46,7 +46,8 @@ public final class GameBootstrap {
 
     Game.setDisplay(new TitleDisplay());
 
-    Renderer.initScreen(headless);
+    // Always transmuteMode: GameBootstrap never owns an AWT window (Transmute does).
+    Renderer.initScreen(true);
 
     World.resetGame();
     Game.player.eid = 0;

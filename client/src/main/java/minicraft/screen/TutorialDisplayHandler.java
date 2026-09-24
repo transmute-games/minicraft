@@ -75,7 +75,7 @@ public class TutorialDisplayHandler {
                 Localization.getLocalized(
                     "minicraft.control_guide.move",
                     String.format(
-                        "%s|%s|%s|%s",
+                        "%s, %s, %s, %s",
                         Game.input.getMapping("move-up"),
                         Game.input.getMapping("move-left"),
                         Game.input.getMapping("move-down"),
@@ -104,8 +104,6 @@ public class TutorialDisplayHandler {
   }
 
   public static class ControlGuide {
-    private static int animation = 60;
-
     private final int duration; // The duration pressing the key; in ticks.
     private final String key; // From mapping.
     private final Supplier<String> display;
@@ -199,7 +197,6 @@ public class TutorialDisplayHandler {
 
   public static void tick(InputHandler input) {
     if (currentGuide != null) {
-      if (ControlGuide.animation > 0) ControlGuide.animation--;
       if (input.getMappedKey("expandQuestDisplay").isClicked()) {
         Logging.TUTORIAL.debug("Force-completed the guides.");
         turnOffGuides();
@@ -209,7 +206,6 @@ public class TutorialDisplayHandler {
       if (currentGuide.interactedDuration >= currentGuide.duration) {
         if (controlGuides.indexOf(currentGuide) < controlGuides.size() - 1) {
           currentGuide = controlGuides.get(controlGuides.indexOf(currentGuide) + 1);
-          ControlGuide.animation = 60;
         } else {
           turnOffGuides(); // Completed guide.
         }
@@ -233,57 +229,31 @@ public class TutorialDisplayHandler {
   /** Rendering directly on the GUI/HUD. */
   public static void render(Screen screen) {
     if (currentGuide != null) { // Is ongoing.
-      String[] lines = Font.getLines(currentGuide.display.get(), Screen.w, Screen.h, 0);
-      if (ControlGuide.animation > 0) {
-        int textWidth = Font.textWidth(lines);
-        int xPadding = Screen.w / 2 - (textWidth + 8) / 2;
-        int yPadding = Screen.h / 2 - (lines.length * 8 + 8) / 2;
-        screen.fillRect(
-            xPadding + 1, yPadding + 1, textWidth + 6, lines.length * 8 + 6, Color.BLUE);
-        screen.drawAxisLine(xPadding, yPadding, 0, textWidth + 8, Color.WHITE); // left border
-        screen.drawAxisLine(
-            xPadding,
-            yPadding + lines.length * 8 + 7,
-            0,
-            textWidth + 8,
-            Color.WHITE); // right border
-        screen.drawAxisLine(xPadding, yPadding, 1, lines.length * 8 + 8, Color.WHITE); // top border
-        screen.drawAxisLine(
-            xPadding + lines.length * 8 + 7,
-            yPadding,
-            1,
-            lines.length * 8 + 8,
-            Color.WHITE); // bottom border
-
-        int yPad = Screen.h / 2 - (lines.length * 8) / 2;
-        for (int i = 0; i < lines.length; i++) {
-          Font.drawCentered(lines[i], screen, yPad + 8 * i, Color.WHITE);
-        }
-      } else {
-        Menu menu =
-            new Menu.Builder(true, 0, RelPos.RIGHT)
-                .setPositioning(new Point(Screen.w - 9, 9), RelPos.BOTTOM_LEFT)
-                .setSelectable(false)
-                .setEntries(StringEntry.useLines(Color.WHITE, false, lines))
-                .createMenu();
-        menu.render(screen);
-        Rectangle bounds = menu.getBounds();
-        int length = bounds.getWidth() - 4;
-        int bottom = bounds.getBottom() - 2;
-        int left = bounds.getLeft() + 2;
-        screen.drawAxisLine(
-            left,
-            bottom,
-            0,
-            length * currentGuide.interactedDuration / currentGuide.duration,
-            Color.WHITE);
-        screen.drawAxisLine(
-            left,
-            bottom - 1,
-            0,
-            length * currentGuide.interactedDuration / currentGuide.duration,
-            Color.WHITE);
-      }
+      // Wrap to a HUD-sized column (not full screen) so the docked box stays compact.
+      String[] lines = Font.getLines(currentGuide.display.get(), Screen.w * 2 / 3, Screen.h, 0);
+      Menu menu =
+          new Menu.Builder(true, 0, RelPos.LEFT)
+              .setPositioning(new Point(Screen.w - 9, 9), RelPos.BOTTOM_LEFT)
+              .setSelectable(false)
+              .setEntries(StringEntry.useLines(Color.WHITE, false, lines))
+              .createMenu();
+      menu.render(screen);
+      Rectangle bounds = menu.getBounds();
+      int length = bounds.getWidth() - 4;
+      int bottom = bounds.getBottom() - 2;
+      int left = bounds.getLeft() + 2;
+      screen.drawAxisLine(
+          left,
+          bottom,
+          0,
+          length * currentGuide.interactedDuration / currentGuide.duration,
+          Color.WHITE);
+      screen.drawAxisLine(
+          left,
+          bottom - 1,
+          0,
+          length * currentGuide.interactedDuration / currentGuide.duration,
+          Color.WHITE);
     } else if (currentOngoingElement != null) { // Is ongoing.
       Menu menu =
           new Menu.Builder(true, 0, RelPos.RIGHT)
@@ -314,7 +284,6 @@ public class TutorialDisplayHandler {
     if (initial) { // The guide is shown only when the world is first created.
       controlGuides.forEach(c -> c.interactedDuration = 0);
       currentGuide = controlGuides.get(0);
-      ControlGuide.animation = 60;
     } else {
       currentGuide = null;
     }

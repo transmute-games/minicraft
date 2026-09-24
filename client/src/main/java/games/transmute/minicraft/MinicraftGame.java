@@ -8,6 +8,7 @@ import TransmuteCore.core.interfaces.services.IRenderer;
 import TransmuteCore.graphics.Context;
 import TransmuteCore.util.verify.FrameAssert;
 import TransmuteCore.util.verify.GameHarness;
+import minicraft.core.BootSplash;
 import minicraft.core.Game;
 import minicraft.core.GameBootstrap;
 import minicraft.core.Renderer;
@@ -38,19 +39,30 @@ public final class MinicraftGame extends TransmuteCore {
         .ensureDefaultFont();
 
     GameBootstrap.bootstrap(headless);
+    if (!headless && getGameWindow() != null) {
+      InputBridge.attachTypingListener(getGameWindow().getCanvas());
+      Game.setQuitAction(
+          () -> {
+            BootSplash.close();
+            shutdown();
+            System.exit(0);
+          });
+    }
+    // Game window is up; drop the boot splash cards.
+    BootSplash.close();
   }
 
   @Override
   public void update(Manager manager, double delta) {
-    InputBridge.syncFromTransmute(manager.getInputHandler());
-
-    // Fixed 60 Hz Minicraft ticks (Updater.normSpeed), independent of render FPS.
+    // Transmute GameLoop delta is in frames at target FPS (1.0 = one frame), not seconds.
+    // Run one Minicraft input+sim tick per engine frame when rates match (both default 60).
     tickAccumulator += delta;
-    double tickSeconds = 1.0 / Updater.normSpeed;
+    double framesPerTick = getConfig().getTargetFPS() / (double) Updater.normSpeed;
     int safety = 0;
-    while (tickAccumulator >= tickSeconds && safety++ < 5) {
+    while (tickAccumulator >= framesPerTick && safety++ < 5) {
+      InputBridge.syncFromTransmute(manager.getInputHandler());
       Updater.tick();
-      tickAccumulator -= tickSeconds;
+      tickAccumulator -= framesPerTick;
     }
   }
 
@@ -63,10 +75,25 @@ public final class MinicraftGame extends TransmuteCore {
     if (src == null || dst == null) {
       return;
     }
-    int n = Math.min(src.length, dst.length);
-    for (int i = 0; i < n; i++) {
-      // Minicraft buffer is TYPE_INT_RGB; Context expects ARGB.
-      dst[i] = 0xFF000000 | (src[i] & 0x00FFFFFF);
+    // Transmute Context is VIEW_* * SCALE; nearest-neighbor upscale from Minicraft's buffer.
+    // (Engine window size is config.size * config.scale, so we use scale(1) to avoid 9×.)
+    int dw = ctx.getWidth();
+    int dh = ctx.getHeight();
+    for (int y = 0; y < dh; y++) {
+      int sy = y / SCALE;
+      if (sy >= VIEW_H) {
+        break;
+      }
+      int srcRow = sy * VIEW_W;
+      int dstRow = y * dw;
+      for (int x = 0; x < dw; x++) {
+        int sx = x / SCALE;
+        if (sx >= VIEW_W) {
+          break;
+        }
+        // Minicraft buffer is TYPE_INT_RGB; Context expects ARGB.
+        dst[dstRow + x] = 0xFF000000 | (src[srcRow + sx] & 0x00FFFFFF);
+      }
     }
   }
 
@@ -74,8 +101,10 @@ public final class MinicraftGame extends TransmuteCore {
     return new GameConfig.Builder()
         .title(Game.NAME)
         .version(Game.VERSION.toString())
-        .size(VIEW_W, VIEW_H)
-        .scale(SCALE)
+        // Logical framebuffer is VIEW_*×SCALE; scale(1) so the window is 3× not 9×
+        // (Transmute applies size*scale for the window and size/scale for Context).
+        .size(VIEW_W * SCALE, VIEW_H * SCALE)
+        .scale(1)
         .headless(headless)
         .showStartScreen(false)
         .build();
@@ -111,7 +140,9 @@ public final class MinicraftGame extends TransmuteCore {
       return;
     }
 
+    BootSplash.open();
     MinicraftGame game = new MinicraftGame(config(false));
     game.start();
+    // BootSplash.close() runs from init() once the game window is ready.
   }
 }
