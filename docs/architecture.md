@@ -76,4 +76,6 @@ sequenceDiagram
 
 - Do **not** force Minicraft `Level` / rich tiles into transmute `World` (empty/solid only).
 - Prefer adapting menus via the existing `Display` queue before rewriting onto `StateManager`.
-- Headless CI uses `GameHarness` + `SimulatedInput`; `Updater` treats transmute mode as focused so gameplay ticks without an AWT canvas.
+- Headless CI uses `GameHarness` + `SimulatedInput` / `PlaytestScript`; `Updater` treats transmute mode as focused so gameplay ticks without an AWT canvas.
+- `GameConfig` uses logical framebuffer size (`VIEW_W`×`VIEW_H`) and window `.scale(SCALE)`; do not pre-multiply size by scale.
+- Language ports in transmute-core (Python / JS / TS / C) are for agent-subset games; Minicraft stays on the Java reference engine.

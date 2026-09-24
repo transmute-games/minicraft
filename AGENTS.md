@@ -3,7 +3,8 @@
 ## Golden path
 
 1. `flox activate` (Temurin 17 + docs tools).
-2. Publish engine if needed: `(cd ../transmute-core && ./gradlew :transmute-core:publishToMavenLocal)`.
+2. Publish Java engine if needed: `(cd ../transmute-core && ./gradlew :transmute-core:publishToMavenLocal)`
+   (multi-lang monorepo; Minicraft only uses the Java artifact).
 3. `./gradlew spotlessApply deadCodeCheck test :client:verifyHeadless`
 4. `./gradlew :client:run` / `./gradlew :server:run --args='--port 4225'`
 
@@ -12,10 +13,12 @@ Docs live under [`docs/`](docs/README.md). Keep the root README slim.
 ## Authoring seam
 
 - Entry: `games.transmute.minicraft.MinicraftGame` extends `TransmuteCore`.
+- Config: logical framebuffer `.size(VIEW_W, VIEW_H)` + `.scale(SCALE)` (not pre-multiplied).
 - Bootstrap: `minicraft.core.GameBootstrap` (no Swing window).
 - Input: `InputBridge` copies Transmute/`SimulatedInput` into Minicraft `InputHandler`.
 - Render: `Renderer.renderFrame()` → blit into `Context` pixels.
 - Do not replace Minicraft `Level`/`Entity` with transmute `World` for full fidelity.
+- Prefer `PlaytestScript` for scripted input slices in headless tests.
 
 ## Verify
 

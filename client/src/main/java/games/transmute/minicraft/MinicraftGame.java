@@ -74,7 +74,7 @@ public final class MinicraftGame extends TransmuteCore {
     return new GameConfig.Builder()
         .title(Game.NAME)
         .version(Game.VERSION.toString())
-        .size(VIEW_W * SCALE, VIEW_H * SCALE)
+        .size(VIEW_W, VIEW_H)
         .scale(SCALE)
         .headless(headless)
         .showStartScreen(false)
