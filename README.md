@@ -1,5 +1,7 @@
 # Minicraft (transmute-games)
 
+![Minicraft](https://minicraftplus.github.io/Minicraft_logo.png)
+
 Private adaptation of Minicraft+ onto [transmute-core](https://github.com/transmute-games/transmute-core).
 
 ## Modules
