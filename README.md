@@ -20,7 +20,7 @@ Playable transmute-backed client with headless verify, Spotless formatting, dead
 ## Quick start
 
 ```bash
-flox activate                 # JDK 17 + docs/dev tools
+flox activate # JDK 17 + docs/dev tools
 # publish Java transmute-core once if needed:
 #   (cd ../transmute-core && ./gradlew :transmute-core:publishToMavenLocal)
 ./gradlew :client:run
